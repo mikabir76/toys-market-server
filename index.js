@@ -31,7 +31,15 @@ async function run() {
         const result = await cursor.toArray()
         res.send(result)
     })
-
+    app.get('/toys', async(req, res)=>{
+      let query = {};
+      if(req.query?.email){
+        query = {email: req.query.email}
+      }
+      const cursor = toysCollection.find(query).limit(20)
+      const result = await cursor.toArray()
+      res.send(result)
+    })
     app.post('/addToys', async(req, res)=>{
         const toys = req.body;
         console.log(toys)
