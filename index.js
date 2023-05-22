@@ -56,6 +56,18 @@ async function run() {
       const result = await cursor.toArray()
       res.send(result)
     })
+    app.get('/alltoy/:text', async(req, res)=>{
+      console.log(req.params.text)
+      if(req.params.text == 'cricket' || req.params.text == 'football' || req.params.text == 'basketball'){
+
+        const cursor = toysCollection.find({category: req.params.text}).limit(20)
+        const result = await cursor.toArray();
+        return res.send(result)
+      }
+      const cursor = toysCollection.find().limit(20)
+        const result = await cursor.toArray();
+        return res.send(result)
+    })
     app.post('/addToys', async(req, res)=>{
         const toys = req.body;
         console.log(toys)
