@@ -26,23 +26,24 @@ async function run() {
 
     const toysCollection = client.db('toysShop').collection('toy');
 
-    app.get('/addToys', async(req, res)=>{
+    // Search Index
+    const indexKeys = {name: 1, category: 1};
+    const indexOptions = {name: "nameCategory"};
+    const result = await toysCollection.createIndex(indexKeys, indexOptions)
 
-      // const sort = req.query.sort;
-      //       const search = req.query.search;
-      //       console.log(search);
-      //       // const query = {};
-      //       // const query = { price: {$gte: 50, $lte:150}};
-      //       // db.InspirationalWomen.find({first_name: { $regex: /Harriet/i} })
-      //       const query = {title: { $regex: search, $options: 'i'}}
-      //       const options = {
-      //           // sort matched documents in descending order by rating
-      //           sort: { 
-      //               "price": sort === 'asc' ? 1 : -1
-      //           }
-                
-      //       };
-      //       const cursor = serviceCollection.find(query, options);
+    app.get('/toySearch/:text', async(req, res)=>{
+        const searchText = req.params.text;
+        console.log(searchText)
+        const result = await toysCollection.find({
+          $or:[
+            {name: { $regex: searchText, $options: "i"}}, 
+            {category: { $regex: searchText, $options: "i"}}
+          ]
+        }).toArray();
+        res.send(result)
+    })
+
+    app.get('/addToys', async(req, res)=>{
         const cursor = toysCollection.find().limit(20)
         const result = await cursor.toArray()
         res.send(result)
@@ -102,3 +103,36 @@ app.get('/', (req, res)=>{
 app.listen(port, ()=>{
     console.log(`Toy server running on port: ${port}`)
 });
+
+
+
+
+
+
+
+
+/* 
+
+
+
+
+
+      // const sort = req.query.sort;
+      //       const search = req.query.search;
+      //       console.log(search);
+      //       // const query = {};
+      //       // const query = { price: {$gte: 50, $lte:150}};
+      //       // db.InspirationalWomen.find({first_name: { $regex: /Harriet/i} })
+      //       const query = {title: { $regex: search, $options: 'i'}}
+      //       const options = {
+      //           // sort matched documents in descending order by rating
+      //           sort: { 
+      //               "price": sort === 'asc' ? 1 : -1
+      //           }
+                
+      //       };
+      //       const cursor = serviceCollection.find(query, options);
+
+
+
+*/
