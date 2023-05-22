@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 const app = express();
@@ -27,6 +27,22 @@ async function run() {
     const toysCollection = client.db('toysShop').collection('toy');
 
     app.get('/addToys', async(req, res)=>{
+
+      // const sort = req.query.sort;
+      //       const search = req.query.search;
+      //       console.log(search);
+      //       // const query = {};
+      //       // const query = { price: {$gte: 50, $lte:150}};
+      //       // db.InspirationalWomen.find({first_name: { $regex: /Harriet/i} })
+      //       const query = {title: { $regex: search, $options: 'i'}}
+      //       const options = {
+      //           // sort matched documents in descending order by rating
+      //           sort: { 
+      //               "price": sort === 'asc' ? 1 : -1
+      //           }
+                
+      //       };
+      //       const cursor = serviceCollection.find(query, options);
         const cursor = toysCollection.find().limit(20)
         const result = await cursor.toArray()
         res.send(result)
@@ -47,7 +63,12 @@ async function run() {
         res.send(result)
     })
 
-
+    app.delete('/addToys/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await toysCollection.deleteOne(query);
+      res.send(result)
+    })
 
 
     // Send a ping to confirm a successful connection
