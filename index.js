@@ -5,7 +5,13 @@ require("dotenv").config();
 const port = process.env.PORT || 5000;
 const app = express();
 
-app.use(cors())
+const corsOptions ={
+  origin:'*', 
+  credentials:true,
+  optionSuccessStatus:200,
+}
+
+app.use(cors(corsOptions))
 app.use(express.json())
 
 
@@ -22,7 +28,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const toysCollection = client.db('toysShop').collection('toy');
 
@@ -44,9 +50,23 @@ async function run() {
     })
 
     app.get('/addToys', async(req, res)=>{
-        const cursor = toysCollection.find().limit(20)
+      const sort = req.query.sort;
+      const query = {};
+      const options = {
+        sort: {
+          "price" : sort === 'asc' ? 1 : -1
+        }
+      }
+
+        const cursor = toysCollection.find(query, options).limit(20)
         const result = await cursor.toArray()
         res.send(result)
+    })
+    app.get('/addToys/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await toysCollection.findOne(query);
+      res.send(result)
     })
     app.get('/toys', async(req, res)=>{
       let query = {};
@@ -118,35 +138,3 @@ app.listen(port, ()=>{
     console.log(`Toy server running on port: ${port}`)
 });
 
-
-
-
-
-
-
-
-/* 
-
-
-
-
-
-      // const sort = req.query.sort;
-      //       const search = req.query.search;
-      //       console.log(search);
-      //       // const query = {};
-      //       // const query = { price: {$gte: 50, $lte:150}};
-      //       // db.InspirationalWomen.find({first_name: { $regex: /Harriet/i} })
-      //       const query = {title: { $regex: search, $options: 'i'}}
-      //       const options = {
-      //           // sort matched documents in descending order by rating
-      //           sort: { 
-      //               "price": sort === 'asc' ? 1 : -1
-      //           }
-                
-      //       };
-      //       const cursor = serviceCollection.find(query, options);
-
-
-
-*/
